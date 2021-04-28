@@ -23,8 +23,11 @@ export class AppComponent implements OnInit {
   ngOnInit(): void {
     // We must be in an iframe OR opened with window.open
     if (!this.globalVars.inTab && !this.globalVars.inFrame()) {
-      window.location.href = `https://${this.globalVars.environment.nodeHostname}`;
+      console.log('RYAN Its running in the wrong environment, opening new tab');
+      window.open('http://localhost:4200/log-in');
       return;
+    } else {
+      console.log('RYAN Its running in the right environment');
     }
 
     this.identityService.initialize().subscribe(res => {

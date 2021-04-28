@@ -14,6 +14,7 @@ export class EmbedComponent {
 
   tapToUnlock(): void {
     if (!this.identityService.browserSupported) {
+      console.log('RYAN Browser not supported');
       return;
     }
 

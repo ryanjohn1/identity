@@ -39,11 +39,13 @@ export class LogInComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
+    console.log('RYAN ngOnInit of log in comp');
     this.loadUsers();
     this.setCanLogin();
   }
 
   loadUsers(): void {
+    console.log('RYAN going to load users');
     const publicKeys = this.accountService.getPublicKeys();
     for (const publicKey of publicKeys) {
       this.allUsers[publicKey] = {};
@@ -54,14 +56,18 @@ export class LogInComponent implements OnInit {
     } else {
       this.showLoadAccount = false;
       this.selectAccount(publicKeys[0]);
-      this.backendApi.GetUsersStateless(publicKeys).subscribe(res2 => {
-        for (const user of res2.UserList) {
-          this.allUsers[user.PublicKeyBase58Check] = {
-            username: user.ProfileEntryResponse?.Username,
-            profilePic: user.ProfileEntryResponse?.ProfilePic,
-          };
-        }
-      });
+      this.allUsers[publicKeys[0]] = {
+        username: 'Test User',
+        profilePic: '',
+      };
+      // this.backendApi.GetUsersStateless(publicKeys).subscribe(res2 => {
+      //   for (const user of res2.UserList) {
+      //     this.allUsers[user.PublicKeyBase58Check] = {
+      //       username: user.ProfileEntryResponse?.Username,
+      //       profilePic: user.ProfileEntryResponse?.ProfilePic,
+      //     };
+      //   }
+      // });
     }
   }
 
