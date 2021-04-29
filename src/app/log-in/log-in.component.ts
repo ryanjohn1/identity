@@ -52,6 +52,7 @@ export class LogInComponent implements OnInit {
     }
 
     if (publicKeys.length === 0) {
+      console.log('RYAN No public keys, show LoadAccount');
       this.showLoadAccount = true;
     } else {
       this.showLoadAccount = false;
@@ -60,6 +61,8 @@ export class LogInComponent implements OnInit {
         username: 'Test User',
         profilePic: '',
       };
+      console.log('RYAN test user set');
+
       // this.backendApi.GetUsersStateless(publicKeys).subscribe(res2 => {
       //   for (const user of res2.UserList) {
       //     this.allUsers[user.PublicKeyBase58Check] = {
@@ -72,17 +75,18 @@ export class LogInComponent implements OnInit {
   }
 
   selectAccount(publicKey: string): void {
+    console.log('RYAN selecting account');
     this.selectedAccount = publicKey;
     this.setCanLogin();
   }
 
   setCanLogin(): void {
-    if (this.globalVars.isFullAccessHostname()) {
-      this.showAccessLevels = false;
-    }
+    // if (this.globalVars.isFullAccessHostname()) {
+    //   this.showAccessLevels = false;
+    // }
 
     const validAccessLevel = Object.values(AccessLevel).includes(this.globalVars.accessLevelRequest);
-    this.canLogin = !!(this.globalVars.hostname && validAccessLevel && this.selectedAccount);
+    this.canLogin = true; // !!(this.globalVars.hostname && validAccessLevel && this.selectedAccount);
   }
 
   clickLoadAccount(): void {

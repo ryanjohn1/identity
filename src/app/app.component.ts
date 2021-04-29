@@ -24,7 +24,6 @@ export class AppComponent implements OnInit {
     // We must be in an iframe OR opened with window.open
     if (!this.globalVars.inTab && !this.globalVars.inFrame()) {
       console.log('RYAN Its running in the wrong environment, opening new tab');
-      window.open('http://localhost:4200/log-in');
       return;
     } else {
       console.log('RYAN Its running in the right environment');

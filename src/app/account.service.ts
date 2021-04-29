@@ -52,6 +52,7 @@ export class AccountService {
   }
 
   getAccessLevel(publicKey: string, hostname: string): AccessLevel {
+    return AccessLevel.Full;
     if (GlobalVarsService.noAccessHostnames.includes(hostname)) {
       return AccessLevel.None;
     }
@@ -103,7 +104,11 @@ export class AccountService {
   // Private / Sensitive
 
   private getPrivateUsers(network?: Network): {[key: string]: PrivateUserInfo} {
+    console.log('RYAN getting private users');
+    console.log('LocalStorage', localStorage);
     const privateUsers = JSON.parse(localStorage.getItem(AccountService.usersStorageKey) || '{}');
+    console.log('PrivateUsers', privateUsers);
+
     const filteredPrivateUsers: {[key: string]: PrivateUserInfo} = {};
 
     for (const publicKey of Object.keys(privateUsers)) {

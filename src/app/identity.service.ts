@@ -26,12 +26,10 @@ import {
 })
 export class IdentityService {
   // All outbound request promises we still need to resolve
-  private outboundRequests: {[key: string]: any} = {};
+  private outboundRequests: { [key: string]: any } = {};
 
   // Opener can be null, parent is never null
   private currentWindow = opener || parent;
-  private messagePoster = this.currentWindow;
-  // private messagePoster = this.currentWindow.webkit.messageHandlers.jsHandler;
 
   // Embed component checks for browser support
   browserSupported = true;
@@ -57,7 +55,7 @@ export class IdentityService {
   }
 
   login(payload: {
-    users: {[key: string]: PublicUserInfo},
+    users: { [key: string]: PublicUserInfo },
     publicKeyAdded?: string,
     signedUp?: boolean
     signedTransactionHex?: string,
@@ -76,7 +74,7 @@ export class IdentityService {
       return;
     }
 
-    const { id, payload: { encryptedSeedHex, unsignedHashes } } = data;
+    const {id, payload: {encryptedSeedHex, unsignedHashes}} = data;
     const seedHex = this.cryptoService.decryptSeedHex(encryptedSeedHex, this.globalVars.hostname);
     const signedHashes = this.signingService.signBurn(seedHex, unsignedHashes);
 
@@ -86,7 +84,7 @@ export class IdentityService {
   }
 
   private handleSign(data: any): void {
-    const { id, payload: { encryptedSeedHex, transactionHex } } = data;
+    const {id, payload: {encryptedSeedHex, transactionHex}} = data;
     const requiredAccessLevel = this.getRequiredAccessLevel(transactionHex);
     if (!this.approve(data, requiredAccessLevel)) {
       return;
@@ -105,7 +103,7 @@ export class IdentityService {
       return;
     }
 
-    const { id, payload: { encryptedSeedHex, encryptedHexes } } = data;
+    const {id, payload: {encryptedSeedHex, encryptedHexes}} = data;
     const seedHex = this.cryptoService.decryptSeedHex(encryptedSeedHex, this.globalVars.hostname);
     const decryptedHexes = this.signingService.decryptMessages(seedHex, encryptedHexes);
 
@@ -119,7 +117,7 @@ export class IdentityService {
       return;
     }
 
-    const { id, payload: { encryptedSeedHex } } = data;
+    const {id, payload: {encryptedSeedHex}} = data;
     const seedHex = this.cryptoService.decryptSeedHex(encryptedSeedHex, this.globalVars.hostname);
     const jwt = this.signingService.signJWT(seedHex);
 
@@ -184,7 +182,7 @@ export class IdentityService {
   }
 
   private hasAccessLevel(data: any, requiredAccessLevel: AccessLevel): boolean {
-    const { payload: { encryptedSeedHex, accessLevel, accessLevelHmac }} = data;
+    const {payload: {encryptedSeedHex, accessLevel, accessLevelHmac}} = data;
     if (accessLevel < requiredAccessLevel) {
       console.log('less');
       return false;
@@ -199,7 +197,7 @@ export class IdentityService {
     const hasEncryptionKey = this.cryptoService.hasSeedHexEncryptionKey(this.globalVars.hostname);
 
     if (!hasAccess || !hasEncryptionKey) {
-      this.respond(data.id, { approvalRequired: true });
+      this.respond(data.id, {approvalRequired: true});
       return false;
     }
 
@@ -209,10 +207,12 @@ export class IdentityService {
   // Message handling
 
   private handleMessage(event: MessageEvent): void {
-    const { data } = event;
-    const { service, method } = data;
+    const {data} = event;
+    const {service, method} = data;
 
-    if (service !== 'identity') { return; }
+    if (service !== 'identity') {
+      return;
+    }
 
     // Methods are present on incoming requests but not responses
     if (method) {
@@ -236,9 +236,6 @@ export class IdentityService {
       this.handleJwt(data);
     } else if (method === 'info') {
       this.handleInfo(event);
-    } else if (method === 'initialize') {
-      console.log('RYAN Handling initialize ourselves');
-      this.respond(data.id, {});
     } else {
       console.error('Unhandled identity request');
       console.error(event);
@@ -246,7 +243,7 @@ export class IdentityService {
   }
 
   private handleResponse(event: MessageEvent): void {
-    const { data: { id, payload }, origin } = event;
+    const {data: {id, payload}, origin} = event;
     const hostname = new URL(origin).hostname;
     const result = {
       id,
@@ -265,33 +262,47 @@ export class IdentityService {
     const id = uuid();
     const subject = new Subject();
     this.outboundRequests[id] = subject;
-    this.messagePoster.postMessage({
+    this.postMessage({
       id,
       service: 'identity',
       method,
       payload,
-    }, '*');
+    });
 
     return subject;
   }
 
   // Respond to a received message
   private respond(id: string, payload: any): void {
-    this.messagePoster.postMessage({
+    this.postMessage({
       id,
       service: 'identity',
       payload
-    }, '*');
+    });
   }
 
   // Transmit a message without expecting a response
   private cast(method: string, payload?: any): void {
-    this.messagePoster.postMessage({
+    this.postMessage({
       id: null,
       service: 'identity',
       method,
       payload,
-    }, '*');
+    });
+  }
+
+  private postMessage(message: any): void {
+    console.log('RYAN going to postMessage');
+    // iOS Webview
+    if (this.currentWindow.webkit?.messageHandlers?.appInterface !== undefined) {
+      this.currentWindow.webkit.messageHandlers.appInterface.postMessage(message, '*');
+      // Android Webview
+    } else if (this.currentWindow.appInterface !== undefined) {
+      this.currentWindow.appInterface.postMessage(JSON.stringify(message), '*');
+      // Web
+    } else {
+      this.currentWindow.postMessage(message, '*');
+    }
   }
 
 }
