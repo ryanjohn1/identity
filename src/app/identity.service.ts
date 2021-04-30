@@ -292,13 +292,12 @@ export class IdentityService {
   }
 
   private postMessage(message: any): void {
-    console.log('RYAN going to postMessage');
-    // iOS Webview
-    if (this.currentWindow.webkit?.messageHandlers?.appInterface !== undefined) {
-      this.currentWindow.webkit.messageHandlers.appInterface.postMessage(message, '*');
-      // Android Webview
-    } else if (this.currentWindow.appInterface !== undefined) {
-      this.currentWindow.appInterface.postMessage(JSON.stringify(message), '*');
+    // iOS Webview with registered "bitcloutIdentityAppInterface" handler
+    if (this.currentWindow.webkit?.messageHandlers?.bitcloutIdentityAppInterface !== undefined) {
+      this.currentWindow.webkit.messageHandlers.bitcloutIdentityAppInterface.postMessage(message, '*');
+      // Android Webview with registered "bitcloutIdentityAppInterface" handler
+    } else if (this.currentWindow.bitcloutIdentityAppInterface !== undefined) {
+      this.currentWindow.bitcloutIdentityAppInterface.postMessage(JSON.stringify(message), '*');
       // Web
     } else {
       this.currentWindow.postMessage(message, '*');
