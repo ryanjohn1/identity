@@ -13,7 +13,7 @@ export class GlobalVarsService {
   hostname = '';
   accessLevelRequest = AccessLevel.ApproveAll;
 
-  inTab = true;
+  inTab = !!window.opener;
 
   constructor() { }
 

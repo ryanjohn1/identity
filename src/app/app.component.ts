@@ -21,21 +21,14 @@ export class AppComponent implements OnInit {
   ) { }
 
   ngOnInit(): void {
-    // We must be in an iframe OR opened with window.open
-    if (!this.globalVars.inTab && !this.globalVars.inFrame()) {
-      console.log('RYAN Its running in the wrong environment, opening new tab');
-      return;
-    } else {
-      console.log('RYAN Its running in the right environment');
-    }
-
-    this.identityService.initialize().subscribe(res => {
-      this.globalVars.hostname = res.hostname;
-      this.loading = false;
-    });
-
-    // Store testnet for duration of this session
     this.activatedRoute.queryParams.subscribe(params => {
+
+      // We must be in an iframe OR opened with window.open OR running in a webview
+      if (!params.webview && !this.globalVars.inTab && !this.globalVars.inFrame()) {
+        window.location.href = `https://${this.globalVars.environment.nodeHostname}`;
+        return;
+      }
+      // Store testnet for duration of this session
       if (params.testnet) {
         this.globalVars.network = Network.testnet;
       }
@@ -44,5 +37,11 @@ export class AppComponent implements OnInit {
         this.globalVars.accessLevelRequest = params.accessLevelRequest;
       }
     });
+
+    this.identityService.initialize().subscribe(res => {
+      this.globalVars.hostname = res.hostname;
+      this.loading = false;
+    });
+
   }
 }
